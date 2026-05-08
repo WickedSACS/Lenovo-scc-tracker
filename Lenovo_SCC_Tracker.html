@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LENOVO SCC | Master SOP Implementation Tracker</title>
+    <style>
+        :root {
+            --lenovo-red: #E60012;
+            --lenovo-dark: #1a1a1a;
+            --lenovo-gray: #f5f5f5;
+            --lenovo-border: #e0e0e0;
+            --p1-color: #E60012;
+            --p2-color: #F5A623;
+            --p3-color: #4A90D9;
+            --status-ns: #9B9B9B;
+            --status-ip: #F5A623;
+            --status-c: #27AE60;
+            --status-na: #B0B0B0;
+            --white: #ffffff;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f0f2f5;
+            color: var(--text);
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        /* Header */
+        .header {
+            background: var(--white);
+            border-bottom: 3px solid var(--lenovo-red);
+            padding: 20px 28px;
+            margin-bottom: 20px;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .header-logo {
+            width: 44px;
+            height: 44px;
+            background: var(--lenovo-red);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 900;
+            font-size: 20px;
+            letter-spacing: -1px;
+            flex-shrink: 0;
+        }
+        .header-title h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--lenovo-dark);
+            letter-spacing: -0.3px;
+        }
+        .header-title span {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .header-stats {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .stat-card {
+            background: var(--lenovo-gray);
+            border-radius: 10px;
+            padding: 12px 18px;
+            text-align: center;
+            min-width: 70px;
+        }
+        .stat-card .stat-number {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--lenovo-red);
+            line-height: 1;
+        }
+        .stat-card .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+        }
+        .stat-card.complete .stat-number {
+            color: #27AE60;
+        }
+
+        /* Progress Bar */
+        .progress-wrapper {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+        }
+        .progress-bar-outer {
+            background: #e9ecef;
+            border-radius: 20px;
+            height: 14px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        .progress-bar-inner {
+            height: 100%;
+            background: linear-gradient(90deg, #27AE60, #2ECC71);
+            border-radius: 20px;
+            transition: width 0.4s ease;
+            width: 0%;
+        }
+        .progress-text {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-align: right;
+        }
+
+        /* Controls */
+        .controls {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+        .controls label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-right: 2px;
+        }
+        .controls select,
+        .controls input {
+            padding: 8px 12px;
+            border: 1px solid var(--lenovo-border);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            background: #fafafa;
+            cursor: pointer;
+            font-family: inherit;
+            min-width: 130px;
+        }
+        .controls select:focus,
+        .controls input:focus {
+            outline: 2px solid var(--lenovo-red);
+            outline-offset: 1px;
+            border-color: var(--lenovo-red);
+        }
+        .btn-reset {
+            margin-left: auto;
+            padding: 8px 16px;
+            background: var(--lenovo-dark);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.8rem;
+            font-family: inherit;
+            transition: background 0.2s;
+        }
+        .btn-reset:hover {
+            background: #333;
+        }
+        .btn-export {
+            padding: 8px 16px;
+            background: var(--lenovo-red);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.8rem;
+            font-family: inherit;
+            transition: background 0.2s;
+        }
+        .btn-export:hover {
+            background: #c5000f;
+        }
+
+        /* Table */
+        .table-wrapper {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+            min-width: 1100px;
+        }
+        thead {
+            background: var(--lenovo-dark);
+            color: #fff;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+        thead th {
+            padding: 12px 10px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            white-space: nowrap;
+        }
+        tbody td {
+            padding: 10px;
+            border-bottom: 1px solid var(--lenovo-border);
+            vertical-align: middle;
+        }
+        tbody tr {
+            transition: background 0.15s;
+        }
+        tbody tr:hover {
+            background: #fafbfc;
+        }
+        tbody tr.row-hidden {
+            display: none;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 3px 9px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .badge-p1 {
+            background: #FDE8EA;
+            color: #c5000f;
+        }
+        .badge-p2 {
+            background: #FFF3E0;
+            color: #c77800;
+        }
+        .badge-p3 {
+            background: #E3F0FD;
+            color: #1a5fa8;
+        }
+        .status-select {
+            padding: 5px 8px;
+            border-radius: 6px;
+            border: 1px solid var(--lenovo-border);
+            font-size: 0.75rem;
+            background: #fafafa;
+            cursor: pointer;
+            font-family: inherit;
+            min-width: 110px;
+        }
+        .status-select:focus {
+            outline: 2px solid var(--lenovo-red);
+            outline-offset: 1px;
+        }
+        .owner-input {
+            padding: 5px 8px;
+            border-radius: 6px;
+            border: 1px solid var(--lenovo-border);
+            font-size: 0.75rem;
+            background: #fafafa;
+            font-family: inherit;
+            width: 100px;
+        }
+        .date-input {
+            padding: 5px 8px;
+            border-radius: 6px;
+            border: 1px solid var(--lenovo-border);
+            font-size: 0.75rem;
+            background: #fafafa;
+            font-family: inherit;
+            width: 115px;
+        }
+        .ref-code {
+            font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--lenovo-dark);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            z-index: 999;
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 14px;
+            }
+            .header-title h1 {
+                font-size: 1rem;
+            }
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .btn-reset {
+                margin-left: 0;
+            }
+            table {
+                font-size: 0.7rem;
+            }
+        }
+
+        @media print {
+            body {
+                background: #fff;
+            }
+            .controls,
+            .btn-reset,
+            .btn-export,
+            .toast {
+                display: none !important;
+            }
+            .header {
+                box-shadow: none;
+                border-bottom: 2px solid #000;
+            }
+            .table-wrapper {
+                box-shadow: none;
+                overflow-x: visible;
+            }
+            table {
+                font-size: 0.65rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-brand">
+                <div class="header-logo">LS</div>
+                <div class="header-title">
+                    <h1>Master SOP Implementation Tracker</h1>
+                    <span>LENOVO SCC · Plant #1 · Axis 2‑4 · Construction Phase</span>
+                </div>
+            </div>
+            <div class="header-stats">
+                <div class="stat-card complete" id="statComplete">
+                    <div class="stat-number">0</div>
+                    <div class="stat-label">Complete</div>
+                </div>
+                <div class="stat-card" id="statInProgress">
+                    <div class="stat-number">0</div>
+                    <div class="stat-label">In Progress</div>
+                </div>
+                <div class="stat-card" id="statRemaining">
+                    <div class="stat-number">46</div>
+                    <div class="stat-label">Remaining</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress -->
+        <div class="progress-wrapper">
+            <div class="progress-bar-outer">
+                <div class="progress-bar-inner" id="progressBar"></div>
+            </div>
+            <div class="progress-text" id="progressText">0% complete (0 / 46 items)</div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls" id="controls">
+            <label for="filterCategory">Category</label>
+            <select id="filterCategory">
+                <option value="all">All Categories</option>
+            </select>
+            <label for="filterPriority">Priority</label>
+            <select id="filterPriority">
+                <option value="all">All Priorities</option>
+                <option value="P1">P1 – Immediate</option>
+                <option value="P2">P2 – Foundation</option>
+                <option value="P3">P3 – Reinforcement</option>
+            </select>
+            <label for="filterStatus">Status</label>
+            <select id="filterStatus">
+                <option value="all">All Statuses</option>
+                <option value="NS">Not Started</option>
+                <option value="IP">In Progress</option>
+                <option value="C">Complete</option>
+                <option value="N/A">N/A</option>
+            </select>
+            <label for="filterSearch">Search</label>
+            <input type="text" id="filterSearch" placeholder="Search documents...">
+            <button class="btn-export" id="btnExport" title="Export as CSV">📥 Export CSV</button>
+            <button class="btn-reset" id="btnReset">↺ Reset All</button>
+        </div>
+
+        <!-- Table -->
+        <div class="table-wrapper">
+            <table id="checklistTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Document / Template / Form</th>
+                        <th>Category</th>
+                        <th>SOP Reference</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Owner</th>
+                        <th>Target Date</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        (function() {
+            // ──────────────────────────────────────
+            // DATA – Full 46‑item checklist
+            // ──────────────────────────────────────
+            const checklistData = [
+                // 1. Access Control & Gate Operations
+                { id: '1.1', doc: 'Daily Access Log', category: 'Access Control & Gate Ops',
+                    sopRef: 'SCC‑SEC3‑ACC‑31', priority: 'P1', notes: 'Pre‑number pages, hard cover' },
+                { id: '1.2', doc: 'Daily Approved Contractor List template', category: 'Access Control & Gate Ops',
+                    sopRef: 'SCC‑SEC3‑ACC‑31', priority: 'P1', notes: 'Signed by Site Manager daily' },
+                { id: '1.3', doc: 'Temporary Daily Pass cards', category: 'Access Control & Gate Ops',
+                    sopRef: 'SCC‑SEC3‑ACC‑31', priority: 'P1', notes: 'Unique serial numbers, tamper‑evident' },
+                { id: '1.4', doc: 'Visitor Log section (in main log or separate)',
+                    category: 'Access Control & Gate Ops', sopRef: 'SCC‑SEC4‑VIS‑41', priority: 'P1', notes: '' },
+                { id: '1.5', doc: 'Site Safety & Confidentiality Acknowledgment form',
+                    category: 'Access Control & Gate Ops', sopRef: 'SCC‑SEC4‑VIS‑41', priority: 'P1',
+                    notes: 'For every visitor to sign' },
+                { id: '1.6', doc: 'Gate Reconciliation Report template', category: 'Access Control & Gate Ops',
+                    sopRef: 'SCC‑SEC3‑ACC‑36', priority: 'P1', notes: 'End‑of‑shift pass count' },
+                { id: '1.7', doc: 'Ban Register', category: 'Access Control & Gate Ops', sopRef: 'SCC‑SEC3‑ACC‑35',
+                    priority: 'P2', notes: 'With photo, reason, date' },
+                { id: '1.8', doc: 'Vehicle Gate Log', category: 'Access Control & Gate Ops',
+                    sopRef: 'SCC‑SEC3‑ACC (implied)', priority: 'P1',
+                notes: 'Vehicle plate, PO, time, seal' },
+
+                // 2. Visitor Management
+                { id: '2.1', doc: 'Visitor Pass cards (orange)', category: 'Visitor Management',
+                    sopRef: 'SCC‑SEC4‑VIS‑41', priority: 'P1', notes: 'Pre‑numbered, distinct colour' },
+                { id: '2.2', doc: 'Visitor Locker Key Log', category: 'Visitor Management',
+                    sopRef: 'SCC‑SEC4‑VIS‑41', priority: 'P1', notes: 'Issue / return tracking' },
+
+                // 3. Physical Security & Perimeter
+                { id: '3.1', doc: 'Perimeter Inspection Checklist', category: 'Physical Security & Perimeter',
+                    sopRef: 'SCC‑SEC5‑PHY‑55', priority: 'P3', notes: 'Fence, lighting, signage' },
+                { id: '3.2', doc: 'CCTV System Check Log', category: 'Physical Security & Perimeter',
+                    sopRef: 'SCC‑SEC5‑PHY‑55', priority: 'P2', notes: 'Morning functional check' },
+                { id: '3.3', doc: 'Key / Custodian Register', category: 'Physical Security & Perimeter',
+                    sopRef: 'SCC‑SEC5‑PHY‑52', priority: 'P2', notes: 'Key issue and return' },
+
+                // 4. Asset & Materials Protection
+                { id: '4.1', doc: 'Material Receiving Inspection Form', category: 'Asset & Materials Protection',
+                    sopRef: 'SCC‑SEC6‑AST‑61', priority: 'P2', notes: 'Witness offloading, verify count' },
+                { id: '4.2', doc: 'Material Request Slip', category: 'Asset & Materials Protection',
+                    sopRef: 'SCC‑SEC6‑AST‑61', priority: 'P2', notes: 'Quantity dispensed and returned' },
+                { id: '4.3', doc: 'Scrap / Return Log', category: 'Asset & Materials Protection',
+                    sopRef: 'SCC‑SEC6‑AST‑61', priority: 'P2', notes: 'End‑of‑shift scrap reconciliation' },
+                { id: '4.4', doc: 'Tool Crib Check‑out/Check‑in Log', category: 'Asset & Materials Protection',
+                    sopRef: 'SCC‑SEC6‑AST‑61', priority: 'P2', notes: 'Badge‑based tool tracking' },
+                { id: '4.5', doc: 'Material Removal Pass (triplicate)', category: 'Asset & Materials Protection',
+                    sopRef: 'SCC‑SEC6‑AST‑61', priority: 'P2', notes: 'Signed by GC + Lenovo Security' },
+                { id: '4.6', doc: 'High‑Value Asset Inventory Sheet', category: 'Asset & Materials Protection',
+                    sopRef: 'SCC‑SEC6‑AST‑60', priority: 'P2', notes: 'Updated per patrol photo audit' },
+
+                // 5. Incident Reporting & Emergency Response
+                { id: '5.1', doc: 'Incident Report Form', category: 'Incident Reporting & Emergency',
+                    sopRef: 'SCC‑SEC7‑INC‑75', priority: 'P1', notes: 'Already in SOP; print pads' },
+                { id: '5.2', doc: 'Witness Statement Form', category: 'Incident Reporting & Emergency',
+                    sopRef: 'SCC‑SEC8‑WPV‑82 (implied)', priority: 'P3', notes: '' },
+                { id: '5.3', doc: 'Emergency Drill Record', category: 'Incident Reporting & Emergency',
+                    sopRef: 'SCC‑SEC7‑INC‑74', priority: 'P2', notes: 'Attendance, after‑action' },
+                { id: '5.4', doc: 'Emergency Contact List (laminated poster)', category: 'Incident Reporting & Emergency',
+                    sopRef: 'SCC‑SEC7‑INC', priority: 'P1', notes: 'Display at every post' },
+                { id: '5.5', doc: 'Radio Check Log', category: 'Incident Reporting & Emergency',
+                    sopRef: 'SCC‑SEC11‑RAD‑115', priority: 'P1', notes: 'Shift‑start radio test' },
+
+                // 6. Workplace Violence & Conduct
+                { id: '6.1', doc: 'Locker Search Authorisation / Record form', category: 'Workplace Violence & Conduct',
+                    sopRef: 'SCC‑SEC9‑PER‑95', priority: 'P3', notes: 'Co‑signed Security + HR' },
+                { id: '6.2', doc: 'Threat Assessment Form', category: 'Workplace Violence & Conduct',
+                    sopRef: 'SCC‑SEC8‑WPV‑81/82', priority: 'P3', notes: 'For Threat Committee reviews' },
+
+                // 7. Personal Belongings & Locker Management
+                { id: '7.1', doc: 'Locker Assignment Register', category: 'Personal Belongings & Lockers',
+                    sopRef: 'SCC‑SEC9‑PER‑90', priority: 'P2', notes: 'Worker ↔ locker number' },
+                { id: '7.2', doc: 'Prohibited Items Confiscation Log', category: 'Personal Belongings & Lockers',
+                    sopRef: 'SCC‑SEC9‑PER‑93', priority: 'P2', notes: 'Item, worker, disposition' },
+                { id: '7.3', doc: 'Medical Device Registration / Sticker log', category: 'Personal Belongings & Lockers',
+                    sopRef: 'SCC‑SEC9‑PER‑94', priority: 'P2', notes: 'Pre‑approved medical implants' },
+
+                // 8. Information Handling & Document Control
+                { id: '8.1', doc: 'Confidential Document Register', category: 'Information Handling',
+                    sopRef: 'SCC‑SEC10‑INF‑102', priority: 'P3', notes: 'Who holds which doc' },
+                { id: '8.2', doc: 'Document Destruction Log', category: 'Information Handling',
+                    sopRef: 'SCC‑SEC10‑INF‑102', priority: 'P3', notes: 'Cross‑cut shredder verification' },
+
+                // 9. Patrol, Status Reports & Daily Operations
+                { id: '9.1', doc: 'Daily Occurrence Book (DOB)', category: 'Patrol & Daily Operations',
+                    sopRef: 'Multiple sections', priority: 'P1', notes: 'Master chronological log' },
+                { id: '9.2', doc: 'Handover Sheet (already designed)', category: 'Patrol & Daily Operations',
+                    sopRef: 'SCC‑SEC12‑PAT‑219', priority: 'P1', notes: 'Fillable daily, both shifts sign' },
+                { id: '9.3', doc: 'Patrol Photographic Evidence Log', category: 'Patrol & Daily Operations',
+                    sopRef: 'SCC‑SEC12‑PAT‑122', priority: 'P2', notes: 'Linking photos to DOB entries' },
+                { id: '9.4', doc: 'Status Report message templates', category: 'Patrol & Daily Operations',
+                    sopRef: 'SCC‑SEC12‑PAT‑123', priority: 'P1',
+                    notes: 'Pre‑drafted 07:00, 08:00, 13:00, 17:30' },
+
+                // 10. Human Resources & Onboarding
+                { id: '10.1', doc: 'New Member Onboarding Checklist', category: 'HR & Onboarding',
+                    sopRef: 'SCC‑SEC13‑ONB', priority: 'P1', notes: 'Extract from SOP, per trainee file' },
+                { id: '10.2', doc: 'Competency Verification Record (M1‑M10)', category: 'HR & Onboarding',
+                    sopRef: 'SCC‑SEC14‑COM', priority: 'P1', notes: 'Trainee file copy' },
+                { id: '10.3', doc: 'Officer Code of Conduct Acknowledgment', category: 'HR & Onboarding',
+                    sopRef: 'SCC‑SEC2‑COD‑51', priority: 'P1', notes: 'Separate signature page if needed' },
+                { id: '10.4', doc: 'Training Attendance Sheet', category: 'HR & Onboarding', sopRef: 'General',
+                    priority: 'P1', notes: 'Every session, drill, toolbox talk' },
+                { id: '10.5', doc: 'Uniform & PPE Issue Register', category: 'HR & Onboarding',
+                    sopRef: 'SCC‑SEC2‑COD‑12/13', priority: 'P1', notes: 'Issue date, sizes, condition' },
+                { id: '10.6', doc: 'Security Officer Performance Review template', category: 'HR & Onboarding',
+                    sopRef: 'Management', priority: 'P3', notes: 'Tied to competency + conduct' },
+
+                // 11. Quick‑Reference & Signage
+                { id: '11.1', doc: 'Quick‑Reference Card (laminated)', category: 'Quick‑Reference & Signage',
+                    sopRef: 'SCC‑SEC2‑COD‑2193', priority: 'P1', notes: 'Print, laminate, issue to each officer' },
+                { id: '11.2', doc: '"PPE‑Marked Zone" / "Restricted Zone" signs', category: 'Quick‑Reference & Signage',
+                    sopRef: 'SCC‑SEC3‑ACC', priority: 'P1', notes: 'Posted at zone boundaries' },
+                { id: '11.3',
+                    doc: '"No Photography" / "All Vehicles Subject to Search" signs',
+                    category: 'Quick‑Reference & Signage', sopRef: 'SCC‑SEC5‑PHY‑51', priority: 'P1',
+                    notes: 'Per SOP' },
+            ];
+
+            // ──────────────────────────────────────
+            // STATE (loaded from localStorage)
+            // ──────────────────────────────────────
+            const STORAGE_KEY = 'lenovo_scc_checklist_state';
+            let itemStates = {}; // key: id → { status, owner, targetDate }
+
+            function loadState() {
+                try {
+                    const raw = localStorage.getItem(STORAGE_KEY);
+                    if (raw) {
+                        itemStates = JSON.parse(raw);
+                    }
+                } catch (e) {
+                    itemStates = {};
+                }
+                // Ensure all items have defaults
+                checklistData.forEach(item => {
+                    if (!itemStates[item.id]) {
+                        itemStates[item.id] = { status: 'NS', owner: '', targetDate: '' };
+                    }
+                });
+            }
+
+            function saveState() {
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(itemStates));
+                } catch (e) {
+                    showToast('⚠️ Unable to save – localStorage may be full');
+                }
+            }
+
+            function getStatus(itemId) { return itemStates[itemId]?.status || 'NS'; }
+
+            function getOwner(itemId) { return itemStates[itemId]?.owner || ''; }
+
+            function getTargetDate(itemId) { return itemStates[itemId]?.targetDate || ''; }
+
+            function setStatus(itemId, val) {
+                if (!itemStates[itemId]) itemStates[itemId] = { status: 'NS', owner: '', targetDate: '' };
+                itemStates[itemId].status = val;
+                saveState();
+                updateStats();
+            }
+
+            function setOwner(itemId, val) {
+                if (!itemStates[itemId]) itemStates[itemId] = { status: 'NS', owner: '', targetDate: '' };
+                itemStates[itemId].owner = val;
+                saveState();
+            }
+
+            function setTargetDate(itemId, val) {
+                if (!itemStates[itemId]) itemStates[itemId] = { status: 'NS', owner: '', targetDate: '' };
+                itemStates[itemId].targetDate = val;
+                saveState();
+            }
+
+            // ──────────────────────────────────────
+            // DOM references
+            // ──────────────────────────────────────
+            const tableBody = document.getElementById('tableBody');
+            const filterCategory = document.getElementById('filterCategory');
+            const filterPriority = document.getElementById('filterPriority');
+            const filterStatus = document.getElementById('filterStatus');
+            const filterSearch = document.getElementById('filterSearch');
+            const btnReset = document.getElementById('btnReset');
+            const btnExport = document.getElementById('btnExport');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            const statComplete = document.getElementById('statComplete');
+            const statInProgress = document.getElementById('statInProgress');
+            const statRemaining = document.getElementById('statRemaining');
+            const toast = document.getElementById('toast');
+
+            // ──────────────────────────────────────
+            // Render table
+            // ──────────────────────────────────────
+            function renderTable() {
+                // Build category filter options
+                const categories = [...new Set(checklistData.map(i => i.category))].sort();
+                filterCategory.innerHTML = '<option value="all">All Categories</option>';
+                categories.forEach(cat => {
+                    filterCategory.innerHTML +=
+                        `<option value="${cat.replace(/"/g, '&quot;')}">${cat}</option>`;
+                });
+
+                // Build rows
+                tableBody.innerHTML = '';
+                checklistData.forEach(item => {
+                    const status = getStatus(item.id);
+                    const owner = getOwner(item.id);
+                    const targetDate = getTargetDate(item.id);
+
+                    let priorityBadge = '';
+                    if (item.priority === 'P1') priorityBadge =
+                        '<span class="badge badge-p1">P1 – Immediate</span>';
+                    else if (item.priority === 'P2') priorityBadge =
+                        '<span class="badge badge-p2">P2 – Foundation</span>';
+                    else priorityBadge = '<span class="badge badge-p3">P3 – Reinforcement</span>';
+
+                    const tr = document.createElement('tr');
+                    tr.setAttribute('data-id', item.id);
+                    tr.setAttribute('data-category', item.category);
+                    tr.setAttribute('data-priority', item.priority);
+                    tr.setAttribute('data-status', status);
+                    tr.innerHTML = `
+                <td>${item.id}</td>
+                <td><strong>${item.doc}</strong></td>
+                <td>${item.category}</td>
+                <td><span class="ref-code">${item.sopRef}</span></td>
+                <td>${priorityBadge}</td>
+                <td>
+                  <select class="status-select" data-id="${item.id}" data-field="status">
+                    <option value="NS" ${status==='NS'?'selected':''}>NS – Not Started</option>
+                    <option value="IP" ${status==='IP'?'selected':''}>IP – In Progress</option>
+                    <option value="C" ${status==='C'?'selected':''}>C – Complete</option>
+                    <option value="N/A" ${status==='N/A'?'selected':''}>N/A</option>
+                  </select>
+                </td>
+                <td><input type="text" class="owner-input" data-id="${item.id}" data-field="owner" value="${owner.replace(/"/g,'&quot;')}" placeholder="Name"></td>
+                <td><input type="date" class="date-input" data-id="${item.id}" data-field="targetDate" value="${targetDate}"></td>
+                <td style="color:#666;font-size:0.75rem;">${item.notes}</td>
+              `;
+                    tableBody.appendChild(tr);
+                });
+
+                // Attach event listeners
+                tableBody.querySelectorAll('.status-select').forEach(sel => {
+                    sel.addEventListener('change', function() {
+                        setStatus(this.getAttribute('data-id'), this.value);
+                        applyFilters();
+                        showToast('✅ Status updated');
+                    });
+                });
+                tableBody.querySelectorAll('.owner-input').forEach(inp => {
+                    inp.addEventListener('change', function() {
+                        setOwner(this.getAttribute('data-id'), this.value);
+                    });
+                    inp.addEventListener('blur', function() {
+                        setOwner(this.getAttribute('data-id'), this.value);
+                    });
+                });
+                tableBody.querySelectorAll('.date-input').forEach(inp => {
+                    inp.addEventListener('change', function() {
+                        setTargetDate(this.getAttribute('data-id'), this.value);
+                    });
+                });
+
+                applyFilters();
+                updateStats();
+            }
+
+            // ──────────────────────────────────────
+            // Filters
+            // ──────────────────────────────────────
+            function applyFilters() {
+                const catVal = filterCategory.value;
+                const priVal = filterPriority.value;
+                const staVal = filterStatus.value;
+                const searchVal = filterSearch.value.toLowerCase().trim();
+
+                const rows = tableBody.querySelectorAll('tr');
+                rows.forEach(row => {
+                    const cat = row.getAttribute('data-category');
+                    const pri = row.getAttribute('data-priority');
+                    const sta = row.getAttribute('data-status');
+                    const docText = row.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || '';
+                    const notesText = row.querySelector('td:nth-child(9)')?.textContent.toLowerCase() || '';
+                    const sopText = row.querySelector('td:nth-child(4)')?.textContent.toLowerCase() || '';
+                    const combinedSearch = docText + ' ' + notesText + ' ' + sopText;
+
+                    let visible = true;
+                    if (catVal !== 'all' && cat !== catVal) visible = false;
+                    if (priVal !== 'all' && pri !== priVal) visible = false;
+                    if (staVal !== 'all' && sta !== staVal) visible = false;
+                    if (searchVal && !combinedSearch.includes(searchVal)) visible = false;
+
+                    row.classList.toggle('row-hidden', !visible);
+                });
+            }
+
+            filterCategory.addEventListener('change', applyFilters);
+            filterPriority.addEventListener('change', applyFilters);
+            filterStatus.addEventListener('change', applyFilters);
+            filterSearch.addEventListener('input', applyFilters);
+
+            // ──────────────────────────────────────
+            // Stats & Progress
+            // ──────────────────────────────────────
+            function updateStats() {
+                let complete = 0,
+                    inProgress = 0,
+                    remaining = 0;
+                checklistData.forEach(item => {
+                    const s = getStatus(item.id);
+                    if (s === 'C') complete++;
+                    else if (s === 'IP') inProgress++;
+                    else if (s === 'NS') remaining++;
+                });
+                const total = checklistData.length;
+                const pct = Math.round((complete / total) * 100);
+
+                statComplete.querySelector('.stat-number').textContent = complete;
+                statInProgress.querySelector('.stat-number').textContent = inProgress;
+                statRemaining.querySelector('.stat-number').textContent = remaining;
+                progressBar.style.width = pct + '%';
+                progressText.textContent = pct + '% complete (' + complete + ' / ' + total + ' items)';
+            }
+
+            // ──────────────────────────────────────
+            // Reset
+            // ──────────────────────────────────────
+            btnReset.addEventListener('click', function() {
+                if (confirm('Reset ALL items to "Not Started" and clear owners/dates? This cannot be undone.')) {
+                    checklistData.forEach(item => {
+                        itemStates[item.id] = { status: 'NS', owner: '', targetDate: '' };
+                    });
+                    saveState();
+                    renderTable();
+                    showToast('🔄 All items reset');
+                }
+            });
+
+            // ──────────────────────────────────────
+            // Export CSV
+            // ──────────────────────────────────────
+            btnExport.addEventListener('click', function() {
+                let csv =
+                    '#,Document,Category,SOP Reference,Priority,Status,Owner,Target Date,Notes\n';
+                checklistData.forEach(item => {
+                    const status = getStatus(item.id);
+                    const owner = getOwner(item.id);
+                    const targetDate = getTargetDate(item.id);
+                    const statusLabel = { NS: 'Not Started', IP: 'In Progress', C: 'Complete', 'N/A': 'N/A' } [
+                        status
+                    ] || status;
+                    csv +=
+                        `"${item.id}","${item.doc}","${item.category}","${item.sopRef}","${item.priority}","${statusLabel}","${owner}","${targetDate}","${item.notes}"\n`;
+                });
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'Lenovo_SCC_Implementation_Checklist_' + new Date().toISOString().slice(0, 10) +
+                    '.csv';
+                a.click();
+                URL.revokeObjectURL(url);
+                showToast('📥 CSV exported');
+            });
+
+            // ──────────────────────────────────────
+            // Toast
+            // ──────────────────────────────────────
+            function showToast(msg) {
+                toast.textContent = msg;
+                toast.classList.add('show');
+                clearTimeout(toast._timeout);
+                toast._timeout = setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2200);
+            }
+
+            // ──────────────────────────────────────
+            // Keyboard shortcut for search
+            // ──────────────────────────────────────
+            document.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    filterSearch.focus();
+                }
+            });
+
+            // ──────────────────────────────────────
+            // Init
+            // ──────────────────────────────────────
+            loadState();
+            renderTable();
+            showToast('✅ Tracker ready — 46 items loaded');
+        })();
+    </script>
+</body>
+</html>
